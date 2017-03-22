@@ -1,0 +1,2 @@
+build/armv7/release/libcache/timing.o: libcache/timing.c \
+ libcache/libcache.h libcache/timing.h libcache/internal.h

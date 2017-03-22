@@ -1,0 +1,3 @@
+build/armv7/release/libcache/basetime.o: libcache/basetime.c \
+ libcache/basetime.h libcache/libcache.h libcache/utils.h \
+ libcache/internal.h

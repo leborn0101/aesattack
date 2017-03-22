@@ -1,0 +1,2 @@
+build/armv7/release/libcache/cputils.o: libcache/cputils.c \
+ libcache/cputils.h libcache/libcache.h libcache/utils.h
