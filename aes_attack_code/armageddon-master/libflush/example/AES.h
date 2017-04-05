@@ -1,6 +1,9 @@
 #pragma once
 
 #include <stdint.h>
+#include <sys/mman.h>
+#include <sched.h>
+#include <sys/sysinfo.h>
 typedef int32_t int32;
 typedef uint32_t uint32;
 typedef int16_t int16;
