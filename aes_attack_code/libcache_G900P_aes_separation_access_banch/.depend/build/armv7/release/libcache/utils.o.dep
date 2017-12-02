@@ -1,2 +1,0 @@
-build/armv7/release/libcache/utils.o: libcache/utils.c libcache/utils.h \
- libcache/libcache.h

@@ -1,6 +1,0 @@
-build/armv7/release/libcache/libcache.o: libcache/libcache.c \
- libcache/libcache.h libcache/timing.h libcache/internal.h \
- libcache/eviction/eviction.h libcache/eviction/../libcache.h \
- libcache/armv7/libcache.h libcache/armv7/../libcache.h \
- libcache/armv7/timing.h libcache/armv7/memory.h \
- libcache/armv7/configuration.h

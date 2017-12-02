@@ -1,0 +1,4 @@
+
+      [console_scripts]
+      aesattack=tworoundattack.aesattack:main
+      

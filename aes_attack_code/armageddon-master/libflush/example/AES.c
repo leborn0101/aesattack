@@ -15,7 +15,6 @@
 #define Td1(x) TD1[x]
 #define Td2(x) TD2[x]
 #define Td3(x) TD3[x]
-
 uint32 *temporary;
 #define Te0(x) temporary[x]
 #define Te1(x) temporary[x + 256]

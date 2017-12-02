@@ -1,3 +1,0 @@
-build/armv7/release/main.o: main.c ../libcache/libcache.h \
- ../libcache/cputils.h ../libcache/libcache.h ../libcache/utils.h \
- ../libcache/basetime.h ../libcache/mylog.h AES.h

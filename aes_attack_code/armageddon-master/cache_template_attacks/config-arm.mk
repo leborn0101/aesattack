@@ -1,5 +1,5 @@
 # Define Android specific variables
-ANDROID_NDK_PATH = /opt/android-ndk
+ANDROID_NDK_PATH = /home/boli/bin/android-ndk-r12b
 ANDROID_TOOLCHAIN_BIN = ${ANDROID_NDK_PATH}/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin
 ANDROID_SYSROOT = ${ANDROID_NDK_PATH}/platforms/${ANDROID_PLATFORM}/arch-arm
 

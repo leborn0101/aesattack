@@ -5,7 +5,7 @@ PROJECT = cache_template_attack
 VERSION = 0.0.1
 
 # arch
-ARCH = x86
+ARCH = armv8
 
 # version checks
 # If you want to disable any of the checks, set *_VERSION_CHECK to 0.
@@ -64,10 +64,10 @@ TARFILE = ${PROJECT}-${VERSION}.tar.gz
 TARDIR = ${PROJECT}-${VERSION}
 
 # android
-ANDROID_PLATFORM ?= android-21
+ANDROID_PLATFORM ?= android-22
 
 # android device
-WITH_ANDROID ?= 0
+WITH_ANDROID ?= 1
 
 # thread support
-WITH_THREADS ?= 0
+WITH_THREADS ?= 1
