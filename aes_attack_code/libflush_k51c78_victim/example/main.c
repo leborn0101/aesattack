@@ -90,6 +90,7 @@ int main(int argc, char* argv[]) {
 
   while (true) {
     doaes(inaes, &tables);
+    // usleep(10);
   }
 
   aes_ecb_encrypt(NULL, NULL, NULL, &tables);

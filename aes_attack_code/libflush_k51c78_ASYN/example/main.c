@@ -113,6 +113,7 @@ int main(int argc, char* argv[]) {
 
   while (true) {
     getTmpTime2(libflush_session, tmp, base);
+    usleep(50);
   }
 
   free(tmp);
@@ -170,7 +171,7 @@ void writeT2TF(uint32_t *tmp) {
   struct tm* lt;
   time(&time_stamp);
   lt = localtime(&time_stamp);
-  fprintf(file, "%d.%d.%d ", lt->tm_hour, lt->tm_min, lt->tm_sec);
+  fprintf(file, "%d:%d:%d ", lt->tm_hour, lt->tm_min, lt->tm_sec);
   free(&time_stamp);
   for (int i = 0; i < AES_TABLE_SUM; i++) {
       fprintf(file, "%10zu", tmp[i]);
@@ -193,7 +194,7 @@ void writeTimeStamp() {
   }
   time(&time_stamp);
   lt = localtime(&time_stamp);
-  fprintf(file, "%d.%d.%d ", lt->tm_hour, lt->tm_min, lt->tm_sec);
+  fprintf(file, "%d:%d:%d ", lt->tm_hour, lt->tm_min, lt->tm_sec);
   free(&time_stamp);
   fclose(file);
 }
