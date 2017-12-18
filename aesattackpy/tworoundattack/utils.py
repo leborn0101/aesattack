@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"包含从文本中读取数据到内存的方法"
-
+'工具类'
 from scipy import stats
 import numpy as np
 from gf256 import GF256
