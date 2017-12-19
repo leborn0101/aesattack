@@ -132,6 +132,7 @@ void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base) {
     libflush_prime(libflush_session, base2 + j);
     libflush_prime(libflush_session, base3 + j);
   }
+  usleep(10);
   for (int j = 0; j < AES_TABLE_LENGTN; j++) {
     tmp[j + AES_TABLE_LENGTN * 0] = libflush_probe(libflush_session, base0 + j);
     tmp[j + AES_TABLE_LENGTN * 1] = libflush_probe(libflush_session, base1 + j);
@@ -145,6 +146,7 @@ void getTmpTime2(libflush_session_t *libflush_session, uint32_t *tmp, int base) 
   for (int j = 0; j < AES_TABLE_SUM; j++) {
     libflush_prime(libflush_session, base + j);
   }
+  usleep(10);
   for (int j = 0; j < AES_TABLE_SUM; j++) {
     tmp[j] = libflush_probe(libflush_session, base + j);
   }

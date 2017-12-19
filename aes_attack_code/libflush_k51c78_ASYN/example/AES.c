@@ -4,7 +4,7 @@
 #include <sched.h>
 #include <stdio.h>
 
-#define DEBUG_PRINT_INDEX
+//#define DEBUG_PRINT_INDEX
 
 //#define Te0(x) TE0[x]
 //#define Te1(x) TE1[x]

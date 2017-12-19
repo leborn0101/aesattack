@@ -18,7 +18,7 @@ def getlinedata(s):
             line = f.readline().strip()
             data = line.split(" ")
             for each in data:
-                if each != '' and "." not in each:
+                if each != '' and ":" not in each:
                     dt.append(eval(each.strip()))
             yield dt
 
@@ -66,13 +66,13 @@ def drawasynhist(avg):
     color3 = ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green']
     color4 = ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green']
     for i in range(4):
-        color1[4 * i] = 'red'
+        color1[index[4 * i]] = 'red'
     for i in range(4):
-        color2[4 * i + 1] = 'red'
+        color2[index[4 * i + 1]] = 'red'
     for i in range(4):
-        color3[4 * i + 2] = 'red'
+        color3[index[4 * i + 2]] = 'red'
     for i in range(4):
-        color4[4 * i + 3] = 'red'
+        color4[index[4 * i + 3]] = 'red'
     plt.subplot(2, 2, 1)
     tmp1 = []
     for j in range(16):
@@ -94,3 +94,9 @@ def drawasynhist(avg):
         tmp4.append(avg[3 * 16 + j] - 1500)
     plt.bar(range(16), tmp4, color = color4)
     plt.show()
+
+
+def doasynattack():
+    path = "/home/libo/aesattack/aes_attack_result"
+    avg = getmeasurementscore(path)
+    drawasynhist(avg)

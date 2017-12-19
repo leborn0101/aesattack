@@ -4,7 +4,7 @@
 #include <sched.h>
 #include <stdio.h>
 
-#define DEBUG_PRINT_INDEX
+//#define DEBUG_PRINT_INDEX
 
 //#define Te0(x) TE0[x]
 //#define Te1(x) TE1[x]
@@ -985,8 +985,6 @@ void aes_ecb_encrypt(const unsigned char *ckey, const unsigned char *pt,
 
   /* Nr - 1 full rounds */
   r = Nr >> 1;
-  int secondroundflag = 1;
-  int roundtimes = 1;
 
   for (;;) {
 
@@ -1007,23 +1005,6 @@ void aes_ecb_encrypt(const unsigned char *ckey, const unsigned char *pt,
       break;
     }
 
-#ifdef DEBUG_PRINT_INDEX
-    if (secondroundflag == 1) {
-      FILE* srai = NULL;
-      srai = fopen("secondroundaccessindex", "a");
-      if (srai == NULL) {
-          fprintf(stderr, "could not open file secondroundaccessindex!!\n");
-          return;
-      }
-      fprintf(srai, "%5d%5d%5d%5d%5d%5d%5d%5d%5d%5d%5d%5d%5d%5d%5d%5d\n",
-          byte(t0, 3), byte(t0, 2), byte(t0, 1), byte(t0, 0),
-          byte(t1, 3), byte(t1, 2), byte(t1, 1), byte(t1, 0),
-          byte(t2, 3), byte(t2, 2), byte(t2, 1), byte(t2, 0),
-          byte(t3, 3), byte(t3, 2), byte(t3, 1), byte(t3, 0));
-      fclose(srai);
-    }
-#endif
-
     s0 = Te0(byte(t0, 3)) ^ Te1(byte(t1, 2)) ^ Te2(byte(t2, 1)) ^
          Te3(byte(t3, 0)) ^ rk[0];
 
@@ -1035,8 +1016,6 @@ void aes_ecb_encrypt(const unsigned char *ckey, const unsigned char *pt,
 
     s3 = Te0(byte(t3, 3)) ^ Te1(byte(t0, 2)) ^ Te2(byte(t1, 1)) ^
          Te3(byte(t2, 0)) ^ rk[3];
-
-    //if (--roundtimes == 0) break;
     
   }
 
@@ -1065,17 +1044,6 @@ void aes_ecb_encrypt(const unsigned char *ckey, const unsigned char *pt,
       ts->t3_si[i] = aes_get_set(&Te3(i));
     }
     aesflag = 0;
-  }
-
-  if (secondroundflag == 1) {
-    FILE* srai = NULL;
-    srai = fopen("secondroundaccessindex", "a");
-    if (srai == NULL) {
-        fprintf(stderr, "could not open file secondroundaccessindex!!\n");
-        return;
-    }
-    fprintf(srai, "\n");
-    fclose(srai);
   }
 
 }
