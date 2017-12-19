@@ -1,13 +1,8 @@
-'工具类'
+#!/usr/bin/python
 import numpy as np
-
-# 缓存
-samplelines = 0
-asyntime = []
-avgscore = []
+import matplotlib.pyplot as plt
 
 
-# 获取文件的行数
 def getlinenums(s):
     a = -1
     with open(s, "r") as f:
@@ -16,7 +11,6 @@ def getlinenums(s):
     return a
 
 
-# 每次获取文件一行的数据并以数组的形式返回
 def getlinedata(s):
     with open(s, "r") as f:
         while True:
@@ -24,48 +18,60 @@ def getlinedata(s):
             line = f.readline().strip()
             data = line.split(" ")
             for each in data:
-                if each != '' and ":" not in each:
+                if each != '' and "." not in each:
                     dt.append(eval(each.strip()))
             yield dt
 
 
-# 获取异步攻击time
 def readasyntime(path):
-    global samplelines
-    global asyntime
     pt = path + "/asyntime"
+    samplelines = getlinenums(pt)
+    asyntime = []
     g = getlinedata(pt)
     for i in range(samplelines):
         asyntime.append(next(g))
     return asyntime
 
 
-# 通过plaintext和key获取第一轮访问的索引
-def getfirstroundtableaccessindex(plaintext, key):
-    index = []
-    for i in range(16):
-        index[i] = (plaintext[i] ^ key[i]) // 16
-    return index
-
-
-# 获取平均值
-def measurementscore(sample):
-    return np.mean(sample)
-
-
-# 获取第一轮攻击的度量分
 def getmeasurementscore(path):
     asyntime = readasyntime(path)
     transpose = np.transpose(asyntime)
-    tmpavg = []
+    avg = []
     for i in range(len(transpose)):
-        tmpavg.append(np.mean(transpose[i]))
+        avg.append(np.mean(transpose[i]))
     for i in range(len(transpose)):
         nu = 0
         tm = 0
         for j in transpose[i]:
-            if j < tmpavg[i]:
+            if j < avg[i]:
                 nu = nu + 1
                 tm = tm + j
-        tmpavg[i] = tm / nu
-    return tmpavg
+        avg[i] = tm / nu
+    return avg
+
+
+def drawasynhist(avg):
+    key = [0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70]
+    plaintext = [0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60]
+
+    plt.subplot(2, 2, 1)
+    tmp1 = []
+    for j in range(16):
+        tmp1.append(avg[0 * 16 + j] - 1500)
+    plt.bar(range(16), tmp1)
+    plt.subplot(2, 2, 2)
+    tmp2 = []
+    for j in range(16):
+        tmp2.append(avg[1 * 16 + j] - 1500)
+    plt.bar(range(16), tmp2)
+    plt.subplot(2, 2, 3)
+    tmp3 = []
+    for j in range(16):
+        tmp3.append(avg[2 * 16 + j] - 1500)
+    plt.bar(range(16), tmp3)
+    plt.subplot(2, 2, 4)
+    tmp4 = []
+    for j in range(16):
+        tmp4.append(avg[3 * 16 + j] - 1500)
+    plt.bar(range(16), tmp4)
+    plt.show()

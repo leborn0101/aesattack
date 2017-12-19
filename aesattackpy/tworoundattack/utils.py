@@ -528,14 +528,3 @@ def getresult(r2, r5, r8, r15):
             s = "%3d%3d%3d%3d %10.8f" % (t.i, t.j, t.k, t.l, t.s)
             f.write(s)
             f.write("\n")
-
-
-
-
-
-
-
-
-
-
-
