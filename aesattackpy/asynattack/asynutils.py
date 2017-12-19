@@ -50,28 +50,47 @@ def getmeasurementscore(path):
     return avg
 
 
-def drawasynhist(avg):
-    key = [0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70]
-    plaintext = [0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60]
+def getindex(key, plaintext):
+    index = []
+    for i in range(len(key)):
+        index.append(key[i] ^ plaintext[i])
+    return index
 
+
+def drawasynhist(avg):
+    key = [0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7]
+    plaintext = [0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6, 0x6]
+    index = getindex(key, plaintext)
+    color1 = ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green']
+    color2 = ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green']
+    color3 = ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green']
+    color4 = ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green']
+    for i in range(4):
+        color1[4 * i] = 'red'
+    for i in range(4):
+        color2[4 * i + 1] = 'red'
+    for i in range(4):
+        color3[4 * i + 2] = 'red'
+    for i in range(4):
+        color4[4 * i + 3] = 'red'
     plt.subplot(2, 2, 1)
     tmp1 = []
     for j in range(16):
         tmp1.append(avg[0 * 16 + j] - 1500)
-    plt.bar(range(16), tmp1)
+    plt.bar(range(16), tmp1, color = color1)
     plt.subplot(2, 2, 2)
     tmp2 = []
     for j in range(16):
         tmp2.append(avg[1 * 16 + j] - 1500)
-    plt.bar(range(16), tmp2)
+    plt.bar(range(16), tmp2, color = color2)
     plt.subplot(2, 2, 3)
     tmp3 = []
     for j in range(16):
         tmp3.append(avg[2 * 16 + j] - 1500)
-    plt.bar(range(16), tmp3)
+    plt.bar(range(16), tmp3, color = color3)
     plt.subplot(2, 2, 4)
     tmp4 = []
     for j in range(16):
         tmp4.append(avg[3 * 16 + j] - 1500)
-    plt.bar(range(16), tmp4)
+    plt.bar(range(16), tmp4, color = color4)
     plt.show()
