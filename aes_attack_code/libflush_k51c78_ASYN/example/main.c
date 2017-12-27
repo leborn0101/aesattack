@@ -207,8 +207,8 @@ void getBaseTime(libflush_session_t *libflush_session) {
   memset(tmp, 0, BASE_COUNTS * sizeof(uint32_t));
   for (int i = 0; i < CACHE_SET_NUMS; i++) {
     for (int j = 0; j < BASE_COUNTS; j++) {
-    libflush_prime(libflush_session, base + j);
-    time = libflush_probe(libflush_session, base + j);
+    libflush_prime(libflush_session, i);
+    time = libflush_probe(libflush_session, i);
     tmp[j] = time;
     }
     writeBaseTime(tmp);

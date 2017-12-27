@@ -33,6 +33,48 @@ def readasyntime(path):
     return asyntime
 
 
+def getbasetime(path):
+    pt = path + "/asynbase"
+    base = []
+    file = open(pt)
+    lines = file.readlines()
+    for line in lines:
+        elems = line.strip().split(" ")
+        tmp = []
+        for i in range(len(elems)):
+            if elems[i] != "":
+                tmp.append(eval(elems[i].strip()))
+        tmpmean = np.mean(tmp)
+        sum = 0
+        count = 0
+        for j in tmp:
+            if j < 2 * tmpmean:
+                count = count + 1
+                sum = sum + j
+        base.append(sum / count)
+    if len(base) != 512:
+        print("error: base time are not whole!!")
+    return base
+
+
+
+def getmeasurementscorebase(path, basetime, base):
+    asyntime = readasyntime(path)
+    transpose = np.transpose(asyntime)
+    avg = []
+    for i in range(len(transpose)):
+        avg.append(np.mean(transpose[i]))
+    for i in range(len(transpose)):
+        nu = 0
+        tm = 0
+        for j in transpose[i]:
+            if j < 2 * avg[i]:
+                nu = nu + 1
+                tm = tm + j
+        avg[i] = tm / nu - basetime[base + i]
+    return avg
+
+
 def getmeasurementscore(path):
     asyntime = readasyntime(path)
     transpose = np.transpose(asyntime)
@@ -43,7 +85,7 @@ def getmeasurementscore(path):
         nu = 0
         tm = 0
         for j in transpose[i]:
-            if j < avg[i]:
+            if j < 2 * avg[i]:
                 nu = nu + 1
                 tm = tm + j
         avg[i] = tm / nu
@@ -76,27 +118,30 @@ def drawasynhist(avg):
     plt.subplot(2, 2, 1)
     tmp1 = []
     for j in range(16):
-        tmp1.append(avg[0 * 16 + j] - 1500)
+        tmp1.append(avg[0 * 16 + j])
     plt.bar(range(16), tmp1, color = color1)
     plt.subplot(2, 2, 2)
     tmp2 = []
     for j in range(16):
-        tmp2.append(avg[1 * 16 + j] - 1500)
+        tmp2.append(avg[1 * 16 + j])
     plt.bar(range(16), tmp2, color = color2)
     plt.subplot(2, 2, 3)
     tmp3 = []
     for j in range(16):
-        tmp3.append(avg[2 * 16 + j] - 1500)
+        tmp3.append(avg[2 * 16 + j])
     plt.bar(range(16), tmp3, color = color3)
     plt.subplot(2, 2, 4)
     tmp4 = []
     for j in range(16):
-        tmp4.append(avg[3 * 16 + j] - 1500)
+        tmp4.append(avg[3 * 16 + j])
     plt.bar(range(16), tmp4, color = color4)
     plt.show()
 
 
 def doasynattack():
-    path = "/home/libo/aesattack/aes_attack_result"
-    avg = getmeasurementscore(path)
+    path = "/home/libo/aesattack/aes_attack_result/result4"
+    base = 320
+    basetime = getbasetime(path)
+    avg = getmeasurementscorebase(path, basetime, base)
+    # avg = getmeasurementscore(path)
     drawasynhist(avg)
