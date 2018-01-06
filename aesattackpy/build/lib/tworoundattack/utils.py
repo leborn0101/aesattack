@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"包含从文本中读取数据到内存的方法"
-
+'工具类'
 from scipy import stats
 import numpy as np
 from gf256 import GF256
@@ -532,14 +528,3 @@ def getresult(r2, r5, r8, r15):
             s = "%3d%3d%3d%3d %10.8f" % (t.i, t.j, t.k, t.l, t.s)
             f.write(s)
             f.write("\n")
-
-
-
-
-
-
-
-
-
-
-

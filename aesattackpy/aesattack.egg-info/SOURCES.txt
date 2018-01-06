@@ -8,5 +8,6 @@ aesattack.egg-info/requires.txt
 aesattack.egg-info/top_level.txt
 tworoundattack/__init__.py
 tworoundattack/aesattack.py
+tworoundattack/asynutils.py
 tworoundattack/drawhistogram.py
 tworoundattack/utils.py

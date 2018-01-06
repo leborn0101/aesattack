@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name='aesattack',
-      version='0.0.1',
+      version='0.0.2',
       description=u"analyze AES key by statistic data",
       classifiers=[],
       keywords='',
@@ -16,7 +16,7 @@ setup(name='aesattack',
           'matplotlib',
           'scipy',
           'numpy',
-          'gf256'
+          'gf256',
       ],
       entry_points="""
       [console_scripts]

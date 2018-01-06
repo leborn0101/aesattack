@@ -138,10 +138,12 @@ def drawasynhist(avg):
     plt.show()
 
 
-def doasynattack():
-    path = "/home/libo/aesattack/aes_attack_result/result4"
-    base = 320
+def doasynattack(path, base):
     basetime = getbasetime(path)
-    avg = getmeasurementscorebase(path, basetime, base)
-    # avg = getmeasurementscore(path)
+    avg = getmeasurementscorebase(path, basetime, eval(base.strip()))
+    drawasynhist(avg)
+
+
+def doasynattacknobase(path):
+    avg = getmeasurementscore(path)
     drawasynhist(avg)
