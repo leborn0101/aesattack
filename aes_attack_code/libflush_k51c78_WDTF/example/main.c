@@ -23,7 +23,7 @@
 #define BIND_TO_CPU 0
 #define BIND_THREAD_TO_CPU 1
 #define AES_TABLE_LENGTH 16    // the block num of aes look up table
-#define AES_SAMPLE_SUM 5000       // sample sum
+#define AES_SAMPLE_SUM 2000       // sample sum
 #define AES_KEY_MAX_VALUE 16         // the possibility of key
 #define AES_KEY_LENGTH 16       // the length of key
 #define AES_PLAINTEXT_LENGTH 16 // the length of plaintext
