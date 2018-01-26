@@ -9,8 +9,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_CFLAGS += ${CFLAGS}
-LOCAL_MODULE := attack_interfaces
-LOCAL_SRC_FILES := gaddr.h gset.h androidlog.h AES.h AES.c main.c
+LOCAL_MODULE := example
+LOCAL_SRC_FILES := main.c
 LOCAL_SHARED_LIBRARIES := libflush
-LOCAL_LDLIBS := -lm -llog
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_EXECUTABLE)

@@ -1,7 +1,7 @@
 # See LICENSE file for license and copyright information
 
 PROJECT = libflush
-ARCH = armv8
+ARCH = armv7
 
 LIBFLUSH_VERSION_MAJOR = 0
 LIBFLUSH_VERSION_MINOR = 0
@@ -87,7 +87,7 @@ VERBOSE ?= 0
 COLOR ?= 1
 
 # android
-ANDROID_PLATFORM ?= android-22
+ANDROID_PLATFORM ?= android-23
 
 # thread safe
 WITH_PTHREAD ?= 0
@@ -103,4 +103,4 @@ TIME_SOURCE ?= monotonic_clock
 USE_EVICTION ?= 1
 
 # Define device
-DEVICE_CONFIGURATION ?= k51c78
+DEVICE_CONFIGURATION ?= cancro

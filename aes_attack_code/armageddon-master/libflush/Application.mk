@@ -2,7 +2,7 @@
 APP_BUILD_SCRIPT := Android.mk
 
 # This variable contains the name of the target Android platform.
-APP_PLATFORM := android-22
+APP_PLATFORM := android-23
 
 # By default, the NDK build system generates machine code for the armeabi ABI.
 # This machine code corresponds to an ARMv5TE-based CPU with software floating

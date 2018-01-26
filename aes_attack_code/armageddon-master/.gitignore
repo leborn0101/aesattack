@@ -1,0 +1,5 @@
+.vscode
+*.csv
+*.db
+*.xlsx
+*.txt

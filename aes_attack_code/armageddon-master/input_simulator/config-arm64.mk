@@ -1,5 +1,5 @@
 # Define Android specific variables
-ANDROID_NDK_PATH = /opt/android-ndk
+ANDROID_NDK_PATH = /opt/android/ndk
 ANDROID_TOOLCHAIN_BIN = ${ANDROID_NDK_PATH}/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin
 ANDROID_SYSROOT = ${ANDROID_NDK_PATH}/platforms/${ANDROID_PLATFORM}/arch-arm64
 

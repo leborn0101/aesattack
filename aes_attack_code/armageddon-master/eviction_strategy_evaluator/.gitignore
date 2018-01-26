@@ -1,6 +1,7 @@
 build/
 logs/
 _tmp/
+dist/
 .ropeproject
 *.db
 *.csv

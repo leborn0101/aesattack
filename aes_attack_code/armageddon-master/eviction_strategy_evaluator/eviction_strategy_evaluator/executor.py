@@ -42,7 +42,7 @@ class Executor(object):
         # Upload
         logger.info("Uploading executable")
         execute_command([
-            "adb",
+            "/opt/android/sdk/platform-tools/adb",
             "-s", adb_id,
             "push",
             local_executable,
@@ -52,7 +52,7 @@ class Executor(object):
         # Setting chmod
         logger.info("Setting change mode")
         execute_command([
-            "adb",
+            "/opt/android/sdk/platform-tools/adb",
             "-s", adb_id,
             "shell",
             "su",
@@ -67,7 +67,7 @@ class Executor(object):
         # Running
         logger.info("Running measurements")
         execute_command([
-            "adb",
+            "/opt/android/sdk/platform-tools/adb",
             "-s", adb_id,
             "shell",
             "su",
@@ -81,7 +81,7 @@ class Executor(object):
         ])
 
         execute_command([
-            "adb",
+            "/opt/android/sdk/platform-tools/adb",
             "-s", adb_id,
             "shell",
             "su",
@@ -96,7 +96,7 @@ class Executor(object):
         # Running
         logger.info("Fetching results")
         execute_command([
-            "adb",
+            "/opt/android/sdk/platform-tools/adb",
             "-s", adb_id,
             "pull",
             remote_logfile,
@@ -106,7 +106,7 @@ class Executor(object):
         # Clean-up
         logger.info("Cleaning up")
         execute_command([
-            "adb",
+            "/opt/android/sdk/platform-tools/adb",
             "-s", adb_id,
             "shell",
             "su",
@@ -118,7 +118,7 @@ class Executor(object):
         ])
 
         execute_command([
-            "adb",
+            "/opt/android/sdk/platform-tools/adb",
             "-s", adb_id,
             "shell",
             "su",

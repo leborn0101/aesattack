@@ -1,0 +1,11 @@
+device:
+  name: MI 3W
+  codename: cancro
+  arch: armv7
+  adb-id: 8d57ee64
+  executable-directory: /data/local/tmp
+  log-directory: /data/local/tmp/log
+  threshold: 960
+cache:
+  number-of-sets: 2048
+  line-length: 64

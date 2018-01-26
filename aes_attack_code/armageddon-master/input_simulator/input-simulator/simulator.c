@@ -265,4 +265,49 @@ simulator_send_tap(simulator_t* simulator, int x, int y)
 
   return true;
 }
+#elif defined(CANCRO)
+bool
+simulator_send_tap(simulator_t* simulator, int x, int y)
+{
+  int fd = simulator->fd_tap;
+
+  if (send_event(fd, EV_ABS, ABS_MT_SLOT, 0) == false) {
+    return false;
+  }
+
+  if (send_event(fd, EV_ABS, ABS_MT_TRACKING_ID, 49) == false) {
+    return false;
+  }
+  if (send_event(fd, EV_ABS, ABS_MT_POSITION_X, x) == false) {
+    return false;
+  }
+
+  if (send_event(fd, EV_ABS, ABS_MT_POSITION_Y, y) == false) {
+    return false;
+  }
+
+  if (send_event(fd, EV_KEY, BTN_TOUCH, 1) == false) {
+    return false;
+  }
+
+  if (send_event(fd, EV_SYN, SYN_REPORT, 0) == false) {
+    return false;
+  }
+
+  if (send_event(fd, EV_ABS, ABS_MT_TRACKING_ID, -1) == false) {
+    return false;
+  }
+
+  if (send_event(fd, EV_KEY, BTN_TOUCH, 0) == false) {
+    return false;
+  }
+
+  if (send_event(fd, EV_SYN, SYN_REPORT, 0) == false) {
+    return false;
+  }
+
+  sched_yield();
+
+  return true;
+}
 #endif

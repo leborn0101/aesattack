@@ -1,0 +1,6 @@
+libflush:
+  source-directory: /home/larry/Documents/armageddon/libflush/
+build:
+  directory: /home/larry/Documents/armageddon_log/monotonic_clock/
+logs:
+  directory: /home/larry/Documents/armageddon_log/monotonic_clock/logs
